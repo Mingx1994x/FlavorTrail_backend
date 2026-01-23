@@ -1,0 +1,50 @@
+{
+  // Visit https://aka.ms/tsconfig to read more about this file
+  "compilerOptions": {
+    // File Layout
+    "rootDir": "./src", // 指定原始碼的根目錄
+    "outDir": "./dist", // 指定編譯後的輸出目錄
+
+    // Environment Settings
+    // See also https://aka.ms/tsconfig/module
+    "module": "NodeNext", // 更新模組系統為 ESNext，支援 ECMAScript imports/exports
+    "moduleResolution": "NodeNext", // 確保模組解析方式與 Node.js 一致
+    "target": "ES2020", // 保持輸出目標為 ES2020
+    "types": ["node"], // 包含 Node.js 的型別定義
+    // For nodejs:
+    // "lib": ["esnext"],
+    // "types": ["node"],
+    // and npm install -D @types/node
+
+    // Other Outputs
+    "sourceMap": true, // 生成 source map 以便除錯
+    "declaration": true, // 生成型別定義檔案
+    "declarationMap": true, // 生成型別定義的 source map
+
+    // Stricter Typechecking Options
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "strict": true, // 啟用所有嚴格的型別檢查選項
+
+    // Style Options
+    // "noImplicitReturns": true,
+    // "noImplicitOverride": true,
+    // "noUnusedLocals": true,
+    // "noUnusedParameters": true,
+    // "noFallthroughCasesInSwitch": true,
+    // "noPropertyAccessFromIndexSignature": true,
+
+    // Recommended Options
+    "jsx": "react-jsx",
+    "verbatimModuleSyntax": true,
+    "isolatedModules": true,
+    "noUncheckedSideEffectImports": true,
+    "moduleDetection": "force",
+    "skipLibCheck": true, // 跳過型別定義檔案的檢查以加速編譯
+    "forceConsistentCasingInFileNames": true, // 強制檔案名稱大小寫一致
+    "esModuleInterop": true, // 支援 ES 模組與 CommonJS 模組的互操作性
+    "lib": ["ES2020"] // 使用 ES2020 標準庫
+  },
+  "include": ["src/**/*"], // 包含 src 資料夾下的所有檔案
+  "exclude": ["node_modules"] // 排除 node_modules 資料夾
+}
