@@ -83,7 +83,6 @@ export const checkout = async (
   res.status(201).json({
     status: 'success',
     data: {
-      status: 'success',
       user: {
         id: currentUser.id,
         nickname: currentUser.nickname,
