@@ -11,7 +11,7 @@ import { appError } from './utils/handleError.js';
 
 // routes
 import indexRouter from './routes/index.js';
-import usersRouter from './routes/user.js';
+import usersRouter from './routes/user.routes.js';
 import authRouter from './routes/auth.routes.js';
 import feedbackRouter from './routes/feedback.routes.js';
 
