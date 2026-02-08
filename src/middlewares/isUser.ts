@@ -27,7 +27,10 @@ export const isUser = handleErrorAsync(
     }
 
     // 在 req 物件加入 user 欄位
-    req.user = currentUser;
+    req.user = {
+      id: currentUser.id,
+      role: currentUser.role,
+    };
 
     next();
   },
