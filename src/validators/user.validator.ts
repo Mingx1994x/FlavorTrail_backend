@@ -44,6 +44,15 @@ const validateNicknameChain = (): ValidationChain => {
     .custom(validateNicknameValue);
 };
 
+const validateNicknameOptional = (): ValidationChain => {
+  return body('nickname')
+    .optional({ nullable: true })
+    .custom((value) => {
+      if (value === null) return true;
+      return validateNicknameValue(value);
+    });
+};
+
 /**
  * 密碼規則
  * 長度 6～12
@@ -85,6 +94,7 @@ const validateEmailAvailable = () => {
   });
 };
 
+// 註冊驗證器
 export const signupValidator: ValidationChain[] = [
   validateNicknameChain(),
   validateEmailChain(),
@@ -93,7 +103,39 @@ export const signupValidator: ValidationChain[] = [
   validateConfirmPasswordChain(),
 ];
 
+// 登入驗證器
 export const loginValidator: ValidationChain[] = [
   requiredValidator('password', '密碼欄位'),
   validateEmailChain(),
+];
+
+// 使用者更新資料欄位驗證器
+export const updateUserProfileValidator = [
+  // forbidden fields
+  body('email').not().exists(),
+  body('passwordHash').not().exists(),
+  body('role').not().exists(),
+  body('registerStatus').not().exists(),
+
+  // optional fields
+  validateNicknameOptional(),
+  body('name')
+    .optional({ nullable: true })
+    .isString()
+    .trim()
+    .isLength({ max: 50 }),
+
+  body('phone').optional({ nullable: true }).isString().trim(),
+
+  body('avatarUrl').optional({ nullable: true }).isURL(),
+
+  body('liveCity').optional({ nullable: true }).isString().trim(),
+
+  body('liveDistrict').optional({ nullable: true }).isString().trim(),
+
+  body('introduce')
+    .optional({ nullable: true })
+    .isString()
+    .trim()
+    .isLength({ max: 200 }),
 ];
