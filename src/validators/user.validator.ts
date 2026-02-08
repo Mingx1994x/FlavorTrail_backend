@@ -2,7 +2,7 @@ import { body } from 'express-validator';
 import { requiredValidator } from '../utils/validateUtils.js';
 
 import type { ValidationChain } from 'express-validator';
-import { isExistEmail, isExistNickname } from '../service/usersSheet.js';
+import { isExistEmail } from '../service/usersSheet.js';
 
 const validateEmailChain = (): ValidationChain => {
   return body('email')
@@ -14,32 +14,34 @@ const validateEmailChain = (): ValidationChain => {
     .withMessage('Email 格式錯誤');
 };
 
+const validateNicknameValue = (nickname: string) => {
+  // 1️⃣ 長度（Unicode-aware）
+  const length = Array.from(nickname).length;
+  if (length < 2 || length > 20) {
+    throw new Error('暱稱長度需介於 2~20 字');
+  }
+
+  // 2️⃣ 禁止危險字元
+  const INVALID_CHAR_REGEX = /[<>/\\{}[\]|^~`$]/;
+  if (INVALID_CHAR_REGEX.test(nickname)) {
+    throw new Error('暱稱包含不允許的字元');
+  }
+
+  // 3️⃣ 禁止不可見控制字元
+  if (/\p{C}/u.test(nickname)) {
+    throw new Error('暱稱包含不可見字元');
+  }
+
+  return true;
+};
+
 const validateNicknameChain = (): ValidationChain => {
   return body('nickname')
     .trim()
     .notEmpty()
     .withMessage('暱稱欄位必填')
     .bail()
-    .custom((nickname: string) => {
-      // 1️⃣ 長度（Unicode-aware）
-      const length = Array.from(nickname).length;
-      if (length < 2 || length > 20) {
-        throw new Error('暱稱長度需介於 2~20 字');
-      }
-
-      // 2️⃣ 禁止危險字元
-      const INVALID_CHAR_REGEX = /[<>/\\{}[\]|^~`$]/;
-      if (INVALID_CHAR_REGEX.test(nickname)) {
-        throw new Error('暱稱包含不允許的字元');
-      }
-
-      // 3️⃣ 禁止不可見控制字元
-      if (/\p{C}/u.test(nickname)) {
-        throw new Error('暱稱包含不可見字元');
-      }
-
-      return true;
-    });
+    .custom(validateNicknameValue);
 };
 
 /**
@@ -83,19 +85,8 @@ const validateEmailAvailable = () => {
   });
 };
 
-const validateNicknameAvailable = () => {
-  return body('nickname').custom(async (nickname) => {
-    const isExist = await isExistNickname(nickname);
-    if (isExist) {
-      throw new Error('暱稱已被使用');
-    }
-    return true;
-  });
-};
-
 export const signupValidator: ValidationChain[] = [
   validateNicknameChain(),
-  validateNicknameAvailable(),
   validateEmailChain(),
   validateEmailAvailable(),
   validatePasswordChain(),
