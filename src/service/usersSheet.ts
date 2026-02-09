@@ -2,11 +2,23 @@ import { v4 as uuid, type UUIDTypes } from 'uuid';
 
 import { configManager } from '../config/index.js';
 import { getSheetsClient } from './getSheetClient.js';
-import { appendRow, normalizeRows } from '../utils/normalizeSheets.js';
+import {
+  appendRow,
+  normalizeRows,
+  updateRow,
+} from '../utils/normalizeSheets.js';
 
 import type { TSheetsClient } from '../types/sheets.js';
-import type { TCreateUserData, TUser, TUserBasic } from '../types/users.js';
-import { findByPredicate, isExistBy } from '../utils/handleDataUtils.js';
+import type {
+  TCreateUserData,
+  TUser,
+  TUserUpdatePayload,
+} from '../types/users.js';
+import {
+  findByPredicate,
+  findWithIndex,
+  isExistBy,
+} from '../utils/handleDataUtils.js';
 const SHEET_ID = configManager.sheets.spreadsheet_id;
 
 const USER_SHEET_RANGE = process.env.GOOGLE_USER_RANGE || "'users'!A:L";
@@ -36,6 +48,7 @@ const initializeUserSheet = async (sheets: TSheetsClient) => {
   });
 };
 
+// 查詢使用者列表資料
 export const getUserRows = async () => {
   const sheets = getSheetsClient();
   const response = await sheets.spreadsheets.values
@@ -102,4 +115,37 @@ export const isExistEmail = async (email: string) => {
 export const isExistNickname = async (nickname: string) => {
   const users = await getUserRows();
   return isExistBy(users, (user) => user.nickname === nickname);
+};
+
+// 使用 id 查詢使用者資料
+export const findUserById = async (userId: string) => {
+  const users = await getUserRows();
+  return findWithIndex(users, (user) => user.id === userId);
+};
+
+export const updateUserProfileRow = async (
+  userId: string,
+  payload: TUserUpdatePayload,
+) => {
+  const userRow = await findUserById(userId);
+
+  if (!userRow) {
+    throw new Error('用戶不存在');
+  }
+
+  const updatedUser = {
+    ...userRow.item,
+    ...payload,
+  };
+
+  console.log(updatedUser);
+
+  const sheets = getSheetsClient();
+  await updateRow<TUser>(
+    sheets,
+    'users',
+    userRow.sheetIndex,
+    USER_COLUMNS,
+    updatedUser,
+  );
 };
