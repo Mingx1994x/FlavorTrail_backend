@@ -19,7 +19,7 @@ router.post(
 );
 
 // 登入驗證
-router.post('/check', handleErrorAsync(checkout));
+router.get('/check', handleErrorAsync(checkout));
 
 // 註冊
 router.post(
