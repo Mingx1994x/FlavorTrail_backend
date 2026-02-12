@@ -139,3 +139,9 @@ export const updateUserProfileValidator = [
     .trim()
     .isLength({ max: 200 }),
 ];
+
+// 使用者更新密碼欄位驗證器
+export const updateUserPasswordValidator = [
+  validatePasswordChain(),
+  validateConfirmPasswordChain(),
+];
