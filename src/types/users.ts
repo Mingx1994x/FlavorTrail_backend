@@ -58,3 +58,8 @@ export type TUserUpdatePayload = Partial<
     | 'introduce'
   >
 >;
+
+export type TUserRowData = {
+  item: TUser;
+  sheetIndex: number;
+};

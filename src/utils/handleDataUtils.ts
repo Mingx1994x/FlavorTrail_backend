@@ -29,7 +29,6 @@ export const findWithIndex = <T>(
   if (item === undefined) return undefined;
 
   const sheetIndex = index + 2; // +2: 1 for 1-based, 1 for header
-  console.log('找到一筆資料', sheetIndex, item);
 
   return { sheetIndex, item };
 };

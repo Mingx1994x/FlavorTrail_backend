@@ -1,7 +1,10 @@
-import { getUserRows, updateUserProfileRow } from '../service/usersSheet.js';
+import {
+  findUserRowById,
+  updateUserProfileRow,
+} from '../service/usersSheet.js';
 
 import type { Request, Response, NextFunction } from 'express';
-import type { TUser } from '../types/users.js';
+import type { TUser, TUserUpdatePayload } from '../types/users.js';
 import { appError } from '../utils/handleError.js';
 
 // 取得使用者資料
@@ -10,25 +13,24 @@ export const getUserById = async (
   res: Response,
   next: NextFunction,
 ) => {
-  const { id } = req.params;
-  const resData = await getUserRows();
-  const userData = resData.find((data) => data.id === id);
+  const { id } = req.user;
+  const userData = await findUserRowById(id);
 
   if (!userData) {
-    return next(new appError(401, '使用者不存在'));
+    return next(new appError(404, '使用者不存在'));
   }
 
   res.status(200).json({
     status: 'success',
     data: {
-      email: userData.email,
-      name: userData?.name,
-      nickname: userData.nickname,
-      phone: userData?.phone,
-      avatarUr: userData?.avatarUrl,
-      liveCity: userData?.liveCity,
-      liveDistrict: userData?.liveDistrict,
-      introduce: userData?.introduce,
+      email: userData.item.email,
+      name: userData.item?.name,
+      nickname: userData.item.nickname,
+      phone: userData.item?.phone,
+      avatarUr: userData.item?.avatarUrl,
+      liveCity: userData.item?.liveCity,
+      liveDistrict: userData.item?.liveDistrict,
+      introduce: userData.item?.introduce,
     },
   });
 };
@@ -43,16 +45,13 @@ const allowedFields = [
   'introduce',
 ] as const;
 
-type TUserUpdateUserProfileField = Partial<
-  Pick<TUser, (typeof allowedFields)[number]>
->;
-
 export const updateUserProfile = async (
   req: Request,
   res: Response,
   next: NextFunction,
 ) => {
-  const payload: TUserUpdateUserProfileField = {};
+  // 過濾 request payload
+  const payload: TUserUpdatePayload = {};
   for (const key of allowedFields) {
     if (req.body[key] !== undefined) {
       payload[key] = req.body[key] === '' ? null : req.body[key];
@@ -60,7 +59,13 @@ export const updateUserProfile = async (
   }
 
   const { id } = req.user;
-  await updateUserProfileRow(id, payload);
+  const userRow = await findUserRowById(id);
+
+  if (!userRow) {
+    return next(new appError(404, '使用者不存在'));
+  }
+
+  await updateUserProfileRow(userRow, payload);
 
   res.status(201).json({
     status: 'success',

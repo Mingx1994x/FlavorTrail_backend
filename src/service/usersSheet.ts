@@ -13,7 +13,9 @@ import type {
   TCreateUserData,
   TUser,
   TUserUpdatePayload,
+  TUserRowData,
 } from '../types/users.js';
+
 import {
   findByPredicate,
   findWithIndex,
@@ -118,28 +120,22 @@ export const isExistNickname = async (nickname: string) => {
 };
 
 // 使用 id 查詢使用者資料
-export const findUserById = async (userId: string) => {
+export const findUserRowById = async (
+  userId: string,
+): Promise<TUserRowData | undefined> => {
   const users = await getUserRows();
   return findWithIndex(users, (user) => user.id === userId);
 };
 
+// 更新使用者資料列
 export const updateUserProfileRow = async (
-  userId: string,
+  userRow: TUserRowData,
   payload: TUserUpdatePayload,
 ) => {
-  const userRow = await findUserById(userId);
-
-  if (!userRow) {
-    throw new Error('用戶不存在');
-  }
-
   const updatedUser = {
     ...userRow.item,
     ...payload,
   };
-
-  console.log(updatedUser);
-
   const sheets = getSheetsClient();
   await updateRow<TUser>(
     sheets,
