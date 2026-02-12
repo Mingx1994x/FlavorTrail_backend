@@ -6,6 +6,7 @@ import {
   findExistUserById,
   findExistUserByMail,
 } from '../service/usersSheet.js';
+import { hashPassword, verifyPassword } from '../utils/handlePasswordUtils.js';
 
 import type { Request, Response, NextFunction } from 'express';
 import type { TCreateUserData } from '../types/users.js';
@@ -28,7 +29,7 @@ export const login = async (
     return next(new appError(400, '此帳號無法使用密碼登入'));
   }
 
-  const isMatch = await bcrypt.compare(password, findUser.passwordHash);
+  const isMatch = await verifyPassword(password, findUser.passwordHash);
   if (!isMatch) {
     return next(new appError(400, '使用者不存在或密碼輸入錯誤'));
   }
@@ -39,7 +40,7 @@ export const login = async (
     role: findUser.role,
   });
 
-  res.status(201).json({
+  res.status(200).json({
     status: 'success',
     data: {
       token,
@@ -80,7 +81,7 @@ export const checkout = async (
     return next(new appError(401, '無效的 token'));
   }
 
-  res.status(201).json({
+  res.status(200).json({
     status: 'success',
     data: {
       user: {
@@ -97,10 +98,7 @@ export const signup = async (
   next: NextFunction,
 ) => {
   const { email, password, nickname } = req.body;
-
-  const salt = await bcrypt.genSalt(10);
-  const passwordHash = await bcrypt.hash(password, salt);
-
+  const passwordHash = await hashPassword(password);
   const userData: TCreateUserData = {
     email,
     nickname,
