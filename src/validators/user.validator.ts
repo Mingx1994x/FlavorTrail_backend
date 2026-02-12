@@ -63,6 +63,15 @@ const validatePasswordChain = (
       `${label}格式錯誤，長度需 6～12，至少包含 1 個小寫字母、1 個大寫字母、1 個數字`,
     );
 
+const validateConfirmPasswordChain = () => {
+  return body('confirmPassword').custom((value, { req }) => {
+    if (value !== req.body.password) {
+      throw new Error('確認密碼與密碼不相符');
+    }
+    return true;
+  });
+};
+
 // 欄位是否複用驗證
 const validateEmailAvailable = () => {
   return body('email').custom(async (email) => {
@@ -90,6 +99,7 @@ export const signupValidator: ValidationChain[] = [
   validateEmailChain(),
   validateEmailAvailable(),
   validatePasswordChain(),
+  validateConfirmPasswordChain(),
 ];
 
 export const loginValidator: ValidationChain[] = [
