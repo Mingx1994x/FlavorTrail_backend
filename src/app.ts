@@ -13,7 +13,7 @@ import { appError } from './utils/handleError.js';
 import indexRouter from './routes/index.js';
 import usersRouter from './routes/user.js';
 import authRouter from './routes/auth.routes.js';
-// import categoryRouter from './routes/category.js';
+import feedbackRouter from './routes/feedback.routes.js';
 
 import type { Request, Response, NextFunction } from 'express';
 
@@ -48,7 +48,7 @@ app.use(cors());
 app.use('/', indexRouter);
 app.use('/api/auth', authRouter);
 app.use('/api/user', usersRouter);
-// app.use('/categories', categoryRouter);
+app.use('/api/feedback', feedbackRouter);
 
 // catch 404 and forward to error handler
 app.use((_req, _res, next) => {
