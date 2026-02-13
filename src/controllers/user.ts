@@ -1,11 +1,13 @@
 import {
   findUserRowById,
+  updateUserPasswordRow,
   updateUserProfileRow,
 } from '../service/usersSheet.js';
 
 import type { Request, Response, NextFunction } from 'express';
 import type { TUser, TUserUpdatePayload } from '../types/users.js';
 import { appError } from '../utils/handleError.js';
+import { hashPassword, verifyPassword } from '../utils/handlePasswordUtils.js';
 
 // 取得使用者資料
 export const getUserById = async (
@@ -67,8 +69,52 @@ export const updateUserProfile = async (
 
   await updateUserProfileRow(userRow, payload);
 
-  res.status(201).json({
+  res.status(200).json({
     status: 'success',
     message: '使用者資料更新成功',
+  });
+};
+
+export const updateUserPassword = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  const { id } = req.user;
+  const userRow = await findUserRowById(id);
+
+  if (!userRow) {
+    return next(new appError(404, '使用者不存在'));
+  }
+
+  const { originPassword, password } = req.body;
+  if (!userRow.item.passwordHash) {
+    return next(new appError(400, '此帳號無法使用密碼變更功能'));
+  }
+
+  const isMatch = await verifyPassword(
+    originPassword,
+    userRow.item.passwordHash,
+  );
+
+  if (!isMatch) {
+    return next(new appError(400, '使用者密碼輸入有誤'));
+  }
+
+  const isSamePassword = await verifyPassword(
+    password,
+    userRow.item.passwordHash,
+  );
+
+  if (isSamePassword) {
+    return next(new appError(400, '新密碼不可與舊密碼相同'));
+  }
+
+  const newPasswordHash = await hashPassword(password);
+  await updateUserPasswordRow(userRow, newPasswordHash);
+
+  res.status(200).json({
+    status: 'success',
+    message: '使用者密碼更新成功',
   });
 };

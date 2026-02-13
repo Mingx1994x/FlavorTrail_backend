@@ -145,3 +145,21 @@ export const updateUserProfileRow = async (
     updatedUser,
   );
 };
+
+export const updateUserPasswordRow = async (
+  userRow: TUserRowData,
+  passwordHash: string,
+) => {
+  const updatedUser = {
+    ...userRow.item,
+    passwordHash,
+  };
+  const sheets = getSheetsClient();
+  await updateRow<TUser>(
+    sheets,
+    'users',
+    userRow.sheetIndex,
+    USER_COLUMNS,
+    updatedUser,
+  );
+};

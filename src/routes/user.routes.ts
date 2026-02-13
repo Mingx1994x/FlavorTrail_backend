@@ -1,9 +1,16 @@
 import express from 'express';
 
-import { getUserById, updateUserProfile } from '../controllers/user.js';
+import {
+  getUserById,
+  updateUserPassword,
+  updateUserProfile,
+} from '../controllers/user.js';
 import { handleErrorAsync } from '../utils/handleError.js';
 import { isUser } from '../middlewares/isUser.js';
-import { updateUserProfileValidator } from '../validators/user.validator.js';
+import {
+  updateUserPasswordValidator,
+  updateUserProfileValidator,
+} from '../validators/user.validator.js';
 import { handleValidation } from '../middlewares/validateMiddleware.js';
 
 const router = express.Router();
@@ -18,6 +25,15 @@ router.patch(
   updateUserProfileValidator,
   handleValidation,
   handleErrorAsync(updateUserProfile),
+);
+
+// 更新使用者密碼
+router.patch(
+  '/password',
+  isUser,
+  updateUserPasswordValidator,
+  handleValidation,
+  handleErrorAsync(updateUserPassword),
 );
 
 export default router;
