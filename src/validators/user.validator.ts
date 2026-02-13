@@ -14,6 +14,7 @@ const validateEmailChain = (): ValidationChain => {
     .withMessage('Email 格式錯誤');
 };
 
+// 暱稱欄位規則
 const validateNicknameValue = (nickname: string) => {
   // 1️⃣ 長度（Unicode-aware）
   const length = Array.from(nickname).length;
@@ -36,21 +37,7 @@ const validateNicknameValue = (nickname: string) => {
 };
 
 const validateNicknameChain = (): ValidationChain => {
-  return body('nickname')
-    .trim()
-    .notEmpty()
-    .withMessage('暱稱欄位必填')
-    .bail()
-    .custom(validateNicknameValue);
-};
-
-const validateNicknameOptional = (): ValidationChain => {
-  return body('nickname')
-    .optional({ nullable: true })
-    .custom((value) => {
-      if (value === null) return true;
-      return validateNicknameValue(value);
-    });
+  return body('nickname').trim().custom(validateNicknameValue);
 };
 
 /**
@@ -70,9 +57,7 @@ const validatePasswordChain = (
     .withMessage(`${label}必填`)
     .bail()
     .matches(passwordRegex)
-    .withMessage(
-      `${label}格式錯誤，長度需 6～12，至少包含 1 個小寫字母、1 個大寫字母、1 個數字`,
-    );
+    .withMessage(`${label}格式錯誤，長度需 6～12，包含大小寫字母與數字`);
 
 const validateConfirmPasswordChain = () => {
   return body('confirmPassword').custom((value, { req }) => {
@@ -94,8 +79,56 @@ const validateEmailAvailable = () => {
   });
 };
 
+// optional profile field
+const validateNameChain = (): ValidationChain => {
+  return body('name')
+    .isString()
+    .withMessage('名稱必須為字串格式')
+    .bail()
+    .trim()
+    .isLength({ max: 20 })
+    .withMessage(`名稱長度需少於 20 字`);
+};
+
+const phoneRegex = /^09\d{8}$/;
+const validatePhoneChain = (): ValidationChain => {
+  return body('phone')
+    .isString()
+    .withMessage('手機號碼必須為字串格式')
+    .bail()
+    .trim()
+    .matches(phoneRegex)
+    .withMessage(`需為 09 開頭的 10 碼手機號碼`);
+};
+
+const validateAvatarChain = (): ValidationChain => {
+  return body('avatarUrl').isURL().withMessage(`頭像的網址必須使用網址`);
+};
+
+const validateIntroduceChain = (): ValidationChain => {
+  return body('introduce')
+    .isString()
+    .trim()
+    .withMessage('自我介紹必須為字串格式')
+    .bail()
+    .isLength({ max: 50 })
+    .withMessage(`介紹內容長度需在 50 字內`);
+};
+
+const validateCityChain = (): ValidationChain => {
+  return body('liveCity').isString().trim().withMessage(`城市必須使用字串格式`);
+};
+
+const validateDistrictChain = (): ValidationChain => {
+  return body('liveDistrict')
+    .isString()
+    .trim()
+    .withMessage(`鄉鎮必須使用字串格式`);
+};
+
 // 註冊驗證器
 export const signupValidator: ValidationChain[] = [
+  requiredValidator('nickname', '暱稱欄位'),
   validateNicknameChain(),
   validateEmailChain(),
   validateEmailAvailable(),
@@ -118,26 +151,13 @@ export const updateUserProfileValidator = [
   body('registerStatus').not().exists(),
 
   // optional fields
-  validateNicknameOptional(),
-  body('name')
-    .optional({ nullable: true })
-    .isString()
-    .trim()
-    .isLength({ max: 50 }),
-
-  body('phone').optional({ nullable: true }).isString().trim(),
-
-  body('avatarUrl').optional({ nullable: true }).isURL(),
-
-  body('liveCity').optional({ nullable: true }).isString().trim(),
-
-  body('liveDistrict').optional({ nullable: true }).isString().trim(),
-
-  body('introduce')
-    .optional({ nullable: true })
-    .isString()
-    .trim()
-    .isLength({ max: 200 }),
+  validateNicknameChain().optional({ nullable: true }),
+  validateNameChain().optional({ nullable: true }),
+  validatePhoneChain().optional({ nullable: true }),
+  validateAvatarChain().optional({ nullable: true }),
+  validateCityChain().optional({ nullable: true }),
+  validateDistrictChain().optional({ nullable: true }),
+  validateIntroduceChain().optional({ nullable: true }),
 ];
 
 // 使用者更新密碼欄位驗證器
