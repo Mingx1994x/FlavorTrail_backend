@@ -10,7 +10,7 @@ const SHEET_ID = configManager.sheets.spreadsheet_id;
  */
 export const normalizeRows = <T extends Record<string, any>>(
   rows: any[][],
-  columns: readonly (keyof T)[]
+  columns: readonly (keyof T)[],
 ): T[] => {
   if (!rows || rows.length === 0) {
     return [];
@@ -22,7 +22,7 @@ export const normalizeRows = <T extends Record<string, any>>(
     columns.reduce((acc, key, index) => {
       acc[key] = row[index] ?? '';
       return acc;
-    }, {} as T)
+    }, {} as T),
   );
 };
 
@@ -30,7 +30,7 @@ export const appendRow = async <T extends Record<string, any>>(
   sheets: TSheetsClient,
   range: string,
   columns: readonly (keyof T)[],
-  payload: T
+  payload: T,
 ): Promise<void> => {
   const row = columns.map((key) => {
     const value = payload[key];
@@ -42,6 +42,34 @@ export const appendRow = async <T extends Record<string, any>>(
     range,
     valueInputOption: 'USER_ENTERED',
     insertDataOption: 'INSERT_ROWS',
+    requestBody: {
+      values: [row],
+    },
+  });
+};
+
+/**
+ * 更新指定列的資料
+ */
+export const updateRow = async <T>(
+  sheets: TSheetsClient,
+  sheetName: string,
+  rowIndex: number,
+  columns: readonly (keyof T)[],
+  payload: T,
+) => {
+  const row = columns.map((key) => {
+    const value = payload[key];
+    return value === undefined || value === null ? '' : value;
+  });
+
+  const range = `'${sheetName}'!A${rowIndex}:${String.fromCharCode(
+    64 + columns.length,
+  )}${rowIndex}`;
+  await sheets.spreadsheets.values.update({
+    spreadsheetId: SHEET_ID,
+    range,
+    valueInputOption: 'USER_ENTERED',
     requestBody: {
       values: [row],
     },
