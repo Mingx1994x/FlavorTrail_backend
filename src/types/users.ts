@@ -1,7 +1,7 @@
 import type { UUIDTypes } from 'uuid';
 
-type TUserRole = 'ADMIN' | 'USER';
-type TUserRegisterStatus = 'BASIC' | 'PROFILE';
+export type TUserRole = 'ADMIN' | 'USER';
+export type TUserRegisterStatus = 'BASIC' | 'PROFILE';
 
 export type TUser = {
   id: UUIDTypes;
@@ -44,4 +44,22 @@ export type TCreateUserData = {
 export type TUserJWTPayload = {
   id: UUIDTypes;
   role: TUserRole;
+};
+
+export type TUserUpdatePayload = Partial<
+  Pick<
+    TUser,
+    | 'nickname'
+    | 'name'
+    | 'phone'
+    | 'avatarUrl'
+    | 'liveCity'
+    | 'liveDistrict'
+    | 'introduce'
+  >
+>;
+
+export type TUserRowData = {
+  item: TUser;
+  sheetIndex: number;
 };
