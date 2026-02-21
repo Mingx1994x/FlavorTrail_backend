@@ -29,7 +29,7 @@ export const getUserById = async (
       name: userData.item?.name,
       nickname: userData.item.nickname,
       phone: userData.item?.phone,
-      avatarUr: userData.item?.avatarUrl,
+      avatarUrl: userData.item?.avatarUrl,
       liveCity: userData.item?.liveCity,
       liveDistrict: userData.item?.liveDistrict,
       introduce: userData.item?.introduce,
